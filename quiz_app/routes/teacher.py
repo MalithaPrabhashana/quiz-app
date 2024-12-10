@@ -1,13 +1,24 @@
 from fastapi import APIRouter
-from database import Database
-from models.question import Question
+from models.quiz import Quiz
+from pydantic import BaseModel
+from typing import List
+
+# Define Pydantic models
+class QuestionData(BaseModel):
+    text: str
+    options: List[str]
+    correct_answer: str
+
+class AddQuestionRequest(BaseModel):
+    question_type: str
+    question_data: QuestionData
 
 router = APIRouter()
-
-db = Database()
+quiz = Quiz(title="Teacher's Quiz")
 
 @router.post("/add-question")
-def add_question(question: dict):
-    new_question = Question(**question)
-    db.add_question(new_question)
+def add_question(request: AddQuestionRequest):
+    question_type = request.question_type
+    question_data = request.question_data.dict()
+    quiz.add_question(question_type, question_data)
     return {"message": "Question added successfully!"}
