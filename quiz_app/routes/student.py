@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 router = APIRouter()
 quiz = Quiz(title="Student Quiz")
-quiz.load_questions() 
+quiz.load_questions()
 
 
 class AnswerRequest(BaseModel):

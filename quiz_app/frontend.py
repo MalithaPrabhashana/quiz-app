@@ -7,60 +7,59 @@ BASE_URL = "http://127.0.0.1:8000"  # Replace with your FastAPI server URL if di
 def teacher_view():
     st.title("Teacher's Panel")
 
-    # Get input for question
+    # Get input for question text and type
     question_text = st.text_input("Enter the Question Text:")
     question_type = st.selectbox(
         "Select Question Type",
-        ["Write Answer", "True/False", "Multiple Choice"]
+        ["Single Answer", "True False", "Multiple Choice"]
     )
 
     # Initialize variables for options and correct answer
     options = []
     correct_answer = None
 
-    # Based on the selected question type, gather the question data
+    # Handle inputs based on question type
     if question_type == "Multiple Choice":
         option_1 = st.text_input("Option 1:")
         option_2 = st.text_input("Option 2:")
         option_3 = st.text_input("Option 3:")
         option_4 = st.text_input("Option 4:")
-        
+
         options = [option_1, option_2, option_3, option_4]
-        
-        # Select the correct answer based on the option number (1-4)
         correct_answer = st.selectbox(
             "Select Correct Answer", [1, 2, 3, 4]
-        )
+        )  # Correct answer is 1-based index
 
-    elif question_type == "True/False":
+    elif question_type == "True False":
         options = ["True", "False"]
-        correct_answer = st.selectbox("Select Correct Answer", [1, 2])  # 1 for True, 2 for False
+        correct_answer = st.selectbox(
+            "Select Correct Answer", ["True", "False"]
+        )  # Correct answer is the actual string
 
-    else:  # Write Answer
-        options = None
+    else:  # Write Answer (single_answer)
         correct_answer = st.text_input("Enter the Correct Answer:")
 
-    # Check if all required inputs are filled
+    # Add question button
     if st.button("Add Question"):
-        # Format the question data as required by the backend
+        # Format the request data
         question_data = {
             "question_type": question_type.lower().replace(" ", "_"),  # Convert to snake_case
             "question_data": {
                 "text": question_text,
-                "options": options,
-                "correct_answer": correct_answer,  # Pass correct_answer as an integer
+                "options": options if question_type == "Multiple Choice" else [],
+                "correct_answer": correct_answer if question_type != "Multiple Choice" else int(correct_answer),
             },
         }
 
-        # Send the POST request to add the question
+        # Send the POST request to the backend
         response = requests.post(f"{BASE_URL}/teacher/add-question", json=question_data)
 
-        # Handle response
+        # Handle the response
         if response.status_code == 200:
             st.success("Question added successfully!")
         else:
             st.error("Failed to add question. Try again.")
-
+            
 
 def student_view():
     st.title("Student's Panel")
