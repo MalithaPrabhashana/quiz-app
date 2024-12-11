@@ -10,6 +10,8 @@ class Database:
     def create_tables(self):
         with self.conn:
             self.conn.execute(
+
+                
                 """
                 CREATE TABLE IF NOT EXISTS questions (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
