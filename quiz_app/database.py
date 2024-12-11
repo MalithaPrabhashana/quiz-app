@@ -32,13 +32,14 @@ class Database:
 
     def get_all_questions(self):
         with self.conn:
-            cursor = self.conn.execute("SELECT text, type, options, correct_answer FROM questions")
+            cursor = self.conn.execute("SELECT id, text, type, options, correct_answer FROM questions")
             return [
                 {
-                    "text": row[0],
-                    "type": row[1],
-                    "options": row[2].split("|") if row[2] else None,
-                    "correct_answer": row[3],
+                    "id": row[0],       
+                    "text": row[1],
+                    "type": row[2],
+                    "options": row[3].split("|") if row[3] else None,
+                    "correct_answer": row[4],
                 }
                 for row in cursor.fetchall()
             ]

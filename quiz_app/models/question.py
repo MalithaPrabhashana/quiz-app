@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 
 class Question(ABC):
+    
     def __init__(self, text: str, correct_answer):
+        self.id = None
         self.text = text
         self.correct_answer = correct_answer
 
@@ -26,7 +28,7 @@ class MultipleChoiceQuestion(Question):
         return f"{self.text}\n{options_text}"
 
     def check_answer(self, answer):
-        return int(answer) == self.correct_answer
+        return int(answer) == int(self.correct_answer)
 
 
 class SingleAnswerQuestion(Question):

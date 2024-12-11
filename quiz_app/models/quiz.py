@@ -7,6 +7,7 @@ class Quiz:
         self.questions = []
         self.db = Database()
 
+
     def add_question(self, question_type: str, data: dict):
         """Add a question to the quiz and database."""
         if question_type == "multiple_choice":
@@ -21,18 +22,22 @@ class Quiz:
         self.questions.append(question)
         self.db.add_question(question)  # Save to database
 
+
     def load_questions(self):
         """Load questions from the database."""
         raw_questions = self.db.get_all_questions()
 
         for raw in raw_questions:
-            if raw["type"] == "multiple_choice":
+            if raw["type"] == "multiplechoice":
                 question = MultipleChoiceQuestion(raw["text"], raw["options"], raw["correct_answer"])
-            elif raw["type"] == "single_answer":
+
+            elif raw["type"] == "singleanswer":
                 question = SingleAnswerQuestion(raw["text"], raw["correct_answer"])
-            elif raw["type"] == "true_false":
+
+            elif raw["type"] == "truefalse":
                 question = TrueFalseQuestion(raw["text"], raw["correct_answer"])
             else:
                 continue
+            
+            question.id = raw["id"]
             self.questions.append(question)
-            return question
