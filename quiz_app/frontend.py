@@ -65,50 +65,71 @@ def teacher_view():
 def student_view():
     st.title("Student's Panel")
 
+    if "total_score" not in st.session_state:
+        st.session_state.total_score = 0
+        st.session_state.answered_questions = set()
+
+    st.markdown(f"""
+        <style>
+        .total-score {{
+            position: fixed;
+            top: 70px;
+            right: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }}
+        </style>
+        <div class="total-score">
+            Total Score: {st.session_state.total_score}
+        </div>
+    """, unsafe_allow_html=True)
+
     st.subheader("Available Questions")
     response = requests.get(f"{BASE_URL}/student/all-questions")
 
     if response.status_code == 200:
         questions = response.json()
+
         for question in questions["questions"]:
+            if question["id"] in st.session_state.answered_questions:
+                continue
+
             st.write(f"Q{question['id']}: {question['question']}")
 
             if question["options"]:
-                if question["options"] == ["True", "False"]:  # True/False
-                    selected_option = st.radio(
-                        f"Options for Q{question['id']}", question["options"], key=f"q_{question['id']}"
-                    )
-                else:  # Multiple Choice
-                    selected_option = st.radio(
-                        f"Options for Q{question['id']}", question["options"], key=f"q_{question['id']}"
-                    )   
+                selected_option = st.radio(
+                    f"Options for Q{question['id']}", question["options"], key=f"q_{question['id']}"
+                )
+
                 if st.button(f"Submit Answer for Q{question['id']}", key=f"submit_{question['id']}"):
-                    answer_data = {
-                        "question_id": question["id"],
-                        "answer": selected_option,
-                    }
-                    answer_response = requests.post(f"{BASE_URL}/student/submit-answer", json=answer_data)
-                    if answer_response.status_code == 200:
-                        st.success(f"Answer submitted for Q{question['id']}!")
+                    selected_answer_id = question["options"].index(selected_option) + 1
+
+                    if selected_answer_id == question.get("correct_answer_id", 1):
+                        st.session_state.total_score += 1
+                        st.success(f"Correct answer for Q{question['id']}!")
                     else:
-                        st.error(f"Failed to submit answer for Q{question['id']}.")
-            else:  # No options, hence free-text answer
+                        st.error(f"Incorrect answer for Q{question['id']}.")
+
+                    st.session_state.answered_questions.add(question["id"])
+            else:
                 student_answer = st.text_input(
                     f"Your Answer for Q{question['id']}:", key=f"answer_{question['id']}"
                 )
                 if st.button(f"Submit Answer for Q{question['id']}", key=f"submit_{question['id']}"):
-                    answer_data = {
-                        "question_id": question["id"],
-                        "answer": student_answer,
-                    }
-                    answer_response = requests.post(f"{BASE_URL}/student/submit-answer", json=answer_data)
-                    if answer_response.status_code == 200:
-                        st.success(f"Answer submitted for Q{question['id']}!")
+                    correct_answer = question.get("correct_answer", "").strip().lower()
+
+                    if student_answer.strip().lower() == correct_answer:
+                        st.session_state.total_score += 1
+                        st.success(f"Correct answer for Q{question['id']}!")
                     else:
-                        st.error(f"Failed to submit answer for Q{question['id']}.")
+                        st.error(f"Incorrect answer for Q{question['id']}.")
+
+                    st.session_state.answered_questions.add(question["id"])
     else:
         st.error("Failed to load questions. Try again.")
-
 
 # Main app
 st.sidebar.title("Quiz App")
