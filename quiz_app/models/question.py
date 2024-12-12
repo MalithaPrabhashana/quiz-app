@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 
 class Question(ABC):
-    
     def __init__(self, text: str, correct_answer):
-        self.id = None
+        self.id = None  # Ensure unique ID is assigned externally
         self.text = text
         self.correct_answer = correct_answer
+        self.options = []  # Default empty options for non-MCQ questions
 
     @abstractmethod
     def get_formatted_question(self):
@@ -16,7 +16,7 @@ class Question(ABC):
     def check_answer(self, answer):
         """Validate the provided answer."""
         pass
-    
+
 
 class MultipleChoiceQuestion(Question):
     def __init__(self, text: str, options: list, correct_answer: int):
@@ -39,15 +39,16 @@ class SingleAnswerQuestion(Question):
         return self.text
 
     def check_answer(self, answer):
-        return str(answer).lower() == str(self.correct_answer).lower()
+        return str(answer).strip().lower() == str(self.correct_answer).strip().lower()
 
 
 class TrueFalseQuestion(Question):
     def __init__(self, text: str, correct_answer: bool):
         super().__init__(text, correct_answer)
+        self.options = ["True", "False"]  # True/False questions have fixed options
 
     def get_formatted_question(self):
         return f"{self.text} (True/False)"
 
     def check_answer(self, answer):
-        return str(answer).lower() == str(self.correct_answer).lower()
+        return str(answer).strip().lower() == str(self.correct_answer).strip().lower()

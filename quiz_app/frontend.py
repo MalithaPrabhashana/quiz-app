@@ -128,7 +128,7 @@ def student_view():
 
                     st.session_state.answered_questions.add(question["id"])
     else:
-        st.error("Failed to load questions. Try again.")
+        st.error("Failed to load questions. Try again.") 
 
 # Main app
 st.sidebar.title("Quiz App")

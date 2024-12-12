@@ -52,14 +52,20 @@ def submit_answer(request: AnswerRequest):
 
 @router.get("/all-questions")
 def get_all_questions():
-    all_questions = []
+    try:
+        if not quiz.questions:
+            return {"questions": []}  # Return an empty list if no questions exist
 
-    for index, question in enumerate(quiz.questions):
-        all_questions.append({
-            "id": question.id,
-            "question": question.get_formatted_question(),
-            "options": question.options,
-            "correct_answer": question.correct_answer
-        })
+        all_questions = []
+        for question in quiz.questions:
+            all_questions.append({
+                "id": question.id,
+                "question": question.text,
+                "options": question.options,  # Include options if applicable
+                "correct_answer": question.correct_answer,  # Include correct answer for debugging/admin
+            })
 
-    return {"questions": all_questions}
+        return {"questions": all_questions}
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="An internal server error occurred.")
